@@ -4,48 +4,31 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.app.AppNavHost
 import com.example.app.ui.theme.AppTheme
-import com.example.app.R
-import com.example.app.RoutingNames
-import com.example.app.Character
-import com.example.app.CharacterDb
+import com.example.app.Location
+import com.example.app.LocationDb
 import com.example.app.components.ApiImage
 import com.example.app.components.HeaderBackComponent
 import com.example.app.components.DataField
 
-class CharacterDetailScreenActivity : ComponentActivity() {
+class LocationsDetailScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -63,46 +46,41 @@ class CharacterDetailScreenActivity : ComponentActivity() {
 }
 
 @Composable
-fun CharacterDetailScreen(
-    characterId: Int,
+fun LocationsDetailScreen (
+    locationsId: Int,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val character = CharacterDb().getCharacterById(characterId)
+    var locations = LocationDb().getLocationById(locationsId)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         HeaderBackComponent(
-            title = "Character Datail",
+            title = "Location Datail",
             onClick = {
                 navController.navigateUp()
             }
         )
-
         Column (
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp, horizontal = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            // consumir imaen desde el api
-            ApiImage(
-                uri = character.image
-            )
-
             Text(
-                character.name,
+                locations.name,
                 modifier = Modifier.padding(16.dp),
                 textAlign = TextAlign.Start,
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Column{
-                DataField("Species:", character.species)
-                DataField("Gender:", character.gender)
-                DataField("Status:", character.status)
+                DataField("ID:", locations.id.toString())
+                DataField("Type:", locations.type)
+                DataField("Dimension:", locations.dimension)
             }
         }
     }
@@ -111,10 +89,10 @@ fun CharacterDetailScreen(
 // light theme preview
 @Preview(showBackground = true)
 @Composable
-fun DetailCharacterScreenPreview() {
+fun LocationsDetailScreenPreview() {
     AppTheme {
-        CharacterDetailScreen(
-            characterId = 1,
+        LocationsDetailScreen(
+            locationsId = 1,
             navController = rememberNavController()
         )
     }
@@ -123,10 +101,10 @@ fun DetailCharacterScreenPreview() {
 // dark theme preview
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun DetailCharacterScreenDarkPreview() {
+fun LocationsDetailScreenDarkPreview() {
     AppTheme {
-        CharacterDetailScreen(
-            characterId = 1,
+        LocationsDetailScreen(
+            locationsId = 1,
             navController = rememberNavController()
         )
     }

@@ -10,7 +10,19 @@ sealed class RoutingNames() {
     data object LoginScreen : RoutingNames()
 
     @Serializable
+    data object ProfileScreen : RoutingNames()
+
+    @Serializable
     data class CharacterDetailScreen(
         val characterId: Int
     ) : RoutingNames()
+
+    @Serializable
+    data object LocationsScreen : RoutingNames()
+
+    @Serializable
+    data class LocationsDetailScreen(
+        val locationsId: Int
+    ) : RoutingNames()
+
 }

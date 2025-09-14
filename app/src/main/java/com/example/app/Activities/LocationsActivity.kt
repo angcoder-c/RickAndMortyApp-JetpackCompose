@@ -4,12 +4,15 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -17,39 +20,31 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.app.AppNavHost
 import com.example.app.ui.theme.AppTheme
-import com.example.app.R
-import com.example.app.Character
-import com.example.app.CharacterDb
+import com.example.app.Location
+import com.example.app.LocationDb
 import com.example.app.RoutingNames
-import com.example.app.components.ApiImage
 import com.example.app.components.BottomNavigationBar
 import com.example.app.components.HeaderComponent
 
-class MainActivity : ComponentActivity() {
+class LocationsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
                 val navController = rememberNavController()
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         BottomNavigationBar(navController = navController)
-                    }
-                ) { innerPadding ->
+                    },
+                    modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavHost(
                         navController = navController,
                         modifier = Modifier.padding(innerPadding)
@@ -61,66 +56,69 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(
+fun LocationsScreen (
     navController: NavHostController,
     modifier: Modifier = Modifier
-) {
-    var characters = CharacterDb().getAllCharacters()
+)  {
+    var locations = LocationDb().getAllLocations()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        HeaderComponent("Characters")
+        // header
+        HeaderComponent("Locations")
 
-        // characters list
+        // locations list
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(characters) { character ->
-                Card (
+            items(locations) { location ->
+                LocationRow(
+                    location = location,
                     onClick = {
-                        navController.navigate(RoutingNames.CharacterDetailScreen(character.id))
+                        navController.navigate(RoutingNames.LocationsDetailScreen(location.id))
                     }
-                ){
-                    CharacterRow(character = character)
-                }
-
+                )
             }
         }
     }
 }
 
 @Composable
-fun CharacterRow(character: Character) {
-    Row (
+fun LocationRow(location: Location, onClick: () -> Unit) {
+    Card (
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth(),
+        onClick = onClick
     ) {
-
-        // consumir imaen desde el api
-        ApiImage(
-            uri = character.image,
-            size = 32
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.Start
+        ){
             Text(
-                text = character.name,
+                text = location.name,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = location.type,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Text(
-                text = "${character.species} - ${character.status}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            if (location.dimension != "unknown") {
+                Text(
+                    text = location.dimension,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
         }
     }
 }
@@ -128,9 +126,9 @@ fun CharacterRow(character: Character) {
 // light theme preview
 @Preview(showBackground = true)
 @Composable
-fun MainScreenPreview() {
+fun LocationsScreenPreview() {
     AppTheme {
-        MainScreen(
+        LocationsScreen(
             navController = rememberNavController()
         )
     }
@@ -139,9 +137,9 @@ fun MainScreenPreview() {
 // dark theme preview
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun MainScreenDarkPreview() {
+fun LocationsScreenDarkPreview() {
     AppTheme {
-        MainScreen(
+        LocationsScreen(
             navController = rememberNavController()
         )
     }

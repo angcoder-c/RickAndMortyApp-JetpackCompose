@@ -5,10 +5,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.app.Activities.CharacterDetailScreen
+import com.example.app.Activities.LocationsDetailScreen
+import com.example.app.Activities.LocationsScreen
 import com.example.app.Activities.LoginScreen
 import com.example.app.Activities.MainScreen
+import com.example.app.Activities.ProfileScreen
 import com.example.app.RoutingNames
 
 @Composable
@@ -34,6 +38,22 @@ fun AppNavHost(
                 characterId = characterDetail.characterId,
                 navController = navController
             )
+        }
+
+        composable<RoutingNames.LocationsScreen> {
+            LocationsScreen(navController)
+        }
+
+        composable<RoutingNames.LocationsDetailScreen> { backStackEntry ->
+            val locationDetail = backStackEntry.toRoute<RoutingNames.LocationsDetailScreen>()
+            LocationsDetailScreen(
+                locationsId = locationDetail.locationsId,
+                navController = navController
+            )
+        }
+
+        composable<RoutingNames.ProfileScreen> {
+            ProfileScreen(navController)
         }
     }
 }

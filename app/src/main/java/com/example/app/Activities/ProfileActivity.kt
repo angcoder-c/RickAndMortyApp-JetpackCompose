@@ -10,10 +10,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,21 +37,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.app.R
-import com.example.app.ui.theme.AppTheme
 import com.example.app.AppNavHost
+import com.example.app.R
 import com.example.app.RoutingNames
+import com.example.app.components.BottomNavigationBar
+import com.example.app.components.DataField
+import com.example.app.components.HeaderComponent
+import com.example.app.ui.theme.AppTheme
 
-class LoginActivity : ComponentActivity() {
+class ProfileActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             AppTheme {
                 val navController = rememberNavController()
                 Scaffold(
-                    bottomBar = { null },
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
+                    bottomBar = {
+                        BottomNavigationBar(navController = navController)
+                    },
+                    modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavHost(
                         navController = navController,
                         modifier = Modifier.padding(innerPadding)
@@ -53,66 +68,81 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginScreen(
+fun ProfileScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column (
+        HeaderComponent(
+            title = "Profile"
+        )
+
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(20.dp),
+                .weight(1f)
+                .padding(32.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // rick and mory logo
-            Image(
-                imageVector = ImageVector
-                    .vectorResource(
-                        id = R.drawable.rick_and_morty_logo
-                    ),
-                contentDescription = "rick and morty logo",
+            // user icon
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = "user icon",
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(bottom = 24.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
-            // login button
+
+            // user information
+            Column {
+                DataField(
+                    "Nombre: ",
+                    "Angel Gabriel Chavez Otzoy"
+                )
+                DataField(
+                    "Carnet: ",
+                    "24248"
+                )
+            }
+
+            // unlogin
             Button(
                 onClick = {
-                    navController.navigate(RoutingNames.MainScreen) {
-                        popUpTo(RoutingNames.LoginScreen) { inclusive = true }
+                    navController.navigate(RoutingNames.LoginScreen) {
+                        popUpTo(RoutingNames.ProfileScreen) { inclusive = true }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
             ) {
-                Text("Login")
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "logout",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Cerrar sesión")
             }
         }
-
-        // footer
-        Text(
-            "Angel Gabriel Chavez Otzoy #24248",
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp),
-            textAlign = TextAlign.Center,
-            fontSize = MaterialTheme.typography.titleLarge.fontSize,
-            color = MaterialTheme.colorScheme.primary
-        )
     }
 }
 
 // ligth theme preview
 @Preview(showBackground = true)
 @Composable
-fun LoginPreview() {
+fun ProfileScreenPreview() {
     AppTheme {
-        LoginScreen(
+        ProfileScreen(
             navController = rememberNavController()
         )
     }
@@ -121,9 +151,9 @@ fun LoginPreview() {
 // darck theme preview
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun LoginDarkPreview() {
+fun ProfileScreenDarkPreview() {
     AppTheme {
-        LoginScreen(
+        ProfileScreen(
             navController = rememberNavController()
         )
     }

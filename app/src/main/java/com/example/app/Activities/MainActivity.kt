@@ -15,6 +15,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
@@ -37,6 +40,9 @@ import com.example.app.RoutingNames
 import com.example.app.components.ApiImage
 import com.example.app.components.BottomNavigationBar
 import com.example.app.components.HeaderComponent
+import com.example.app.ViewModels.CharactersViewModel
+import com.example.app.components.ErrorViewComponent
+import com.example.app.components.LoadingViewComponent
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,9 +69,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: CharactersViewModel = viewModel()
 ) {
-    var characters = CharacterDb().getAllCharacters()
+    val charactersState by viewModel.charactersScreenState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,22 +81,36 @@ fun MainScreen(
     ) {
         HeaderComponent("Characters")
 
-        // characters list
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(characters) { character ->
-                Card (
-                    onClick = {
-                        navController.navigate(RoutingNames.CharacterDetailScreen(character.id))
-                    }
-                ){
-                    CharacterRow(character = character)
-                }
+        when {
+            charactersState.isLoading -> {
+                LoadingViewComponent()
+            }
 
+            charactersState.isError -> {
+                ErrorViewComponent(
+                    onRetry = { viewModel.loadCharacters() }
+                )
+            }
+
+            else -> {
+                // characters list
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(charactersState.data) { character ->
+                        Card (
+                            onClick = {
+                                navController.navigate(RoutingNames.CharacterDetailScreen(character.id))
+                            }
+                        ){
+                            CharacterRow(character = character)
+                        }
+
+                    }
+                }
             }
         }
     }

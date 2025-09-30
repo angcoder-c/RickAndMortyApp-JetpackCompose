@@ -41,6 +41,11 @@ android {
 }
 
 dependencies {
+    // view model
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    // coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // coil async image
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)

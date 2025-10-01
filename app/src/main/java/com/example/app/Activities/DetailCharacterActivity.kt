@@ -56,10 +56,6 @@ fun CharacterDetailScreen(
 ) {
     val characterDetailState by viewModel.characterDetailScreenState.collectAsState()
 
-    LaunchedEffect(characterId) {
-        viewModel.loadCharacter(characterId)
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -79,7 +75,7 @@ fun CharacterDetailScreen(
             characterDetailState.isError -> {
                 ErrorViewComponent(
                     onRetry = {
-                        viewModel.loadCharacter(characterId)
+                        viewModel.loadCharacter()
                     }
                 )
             }

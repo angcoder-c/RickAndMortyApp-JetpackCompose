@@ -1,5 +1,6 @@
 package com.example.app.ViewModels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app.Location
@@ -16,18 +17,24 @@ data class LocationDetailScreenState(
     val isError: Boolean = false
 )
 
-class LocationDetailViewModel : ViewModel() {
+class LocationDetailViewModel(
+    private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
     private val _locationDetailScreenState = MutableStateFlow(LocationDetailScreenState())
     val locationDetailScreenState: StateFlow<LocationDetailScreenState> = _locationDetailScreenState.asStateFlow()
 
     private val locationDb = LocationDb()
+    private val locationId: Int = savedStateHandle.get<Int>("locationsId") ?: 0
 
-    fun loadLocation(locationId: Int) {
+    init {
+        loadLocation()
+    }
+    fun loadLocation() {
         viewModelScope.launch {
             _locationDetailScreenState.value = LocationDetailScreenState(isLoading = true)
 
             // carga - 4s
-            delay(2000)
+            delay(4000)
             val randomNumber = (1..10).random()
 
             if (randomNumber % 2 == 0) {

@@ -60,10 +60,6 @@ fun LocationsDetailScreen (
     viewModel: LocationDetailViewModel = viewModel()
 ) {
     val locationDetailScreenState by viewModel.locationDetailScreenState.collectAsState()
-    LaunchedEffect(locationsId) {
-        viewModel.loadLocation(locationsId)
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,7 +79,7 @@ fun LocationsDetailScreen (
             locationDetailScreenState.isError -> {
                 ErrorViewComponent(
                     onRetry = {
-                        viewModel.loadLocation(locationsId)
+                        viewModel.loadLocation()
                     }
                 )
             }

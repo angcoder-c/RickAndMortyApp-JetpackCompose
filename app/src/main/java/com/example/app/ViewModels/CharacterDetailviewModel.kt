@@ -1,5 +1,6 @@
 package com.example.app.ViewModels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app.Character
@@ -16,14 +17,21 @@ data class CharacterDetailScreenState (
     val isError: Boolean = false
 )
 
-class CharacterDetailViewModel: ViewModel() {
+class CharacterDetailViewModel(
+    private val savedStateHandle: SavedStateHandle
+): ViewModel() {
     private val _characterDetailScreenState = MutableStateFlow<CharacterDetailScreenState>(CharacterDetailScreenState())
 
     // flujo de datos
     val characterDetailScreenState: StateFlow<CharacterDetailScreenState> = _characterDetailScreenState.asStateFlow()
     private val characterDb = CharacterDb()
+    private val characterId: Int = savedStateHandle.get<Int>("characterId") ?: 0
 
-    fun loadCharacter(characterId: Int) {
+    init {
+        loadCharacter()
+    }
+
+    fun loadCharacter() {
         viewModelScope.launch {
             _characterDetailScreenState.value = CharacterDetailScreenState(isLoading = true)
 

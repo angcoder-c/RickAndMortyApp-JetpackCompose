@@ -4,46 +4,31 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app.AppNavHost
 import com.example.app.ui.theme.AppTheme
-import com.example.app.R
-import com.example.app.RoutingNames
-import com.example.app.Character
-import com.example.app.CharacterDb
+import com.example.app.ViewModels.CharacterDetailViewModel
 import com.example.app.components.ApiImage
 import com.example.app.components.HeaderBackComponent
 import com.example.app.components.DataField
+import com.example.app.components.ErrorViewComponent
+import com.example.app.components.LoadingViewComponent
 
 class CharacterDetailScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,9 +51,15 @@ class CharacterDetailScreenActivity : ComponentActivity() {
 fun CharacterDetailScreen(
     characterId: Int,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: CharacterDetailViewModel = viewModel()
 ) {
-    val character = CharacterDb().getCharacterById(characterId)
+    val characterDetailState by viewModel.characterDetailScreenState.collectAsState()
+
+    LaunchedEffect(characterId) {
+        viewModel.loadCharacter(characterId)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,28 +72,42 @@ fun CharacterDetailScreen(
             }
         )
 
-        Column (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 50.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            // consumir imaen desde el api
-            ApiImage(
-                uri = character.image
-            )
-
-            Text(
-                character.name,
-                modifier = Modifier.padding(16.dp),
-                textAlign = TextAlign.Start,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Column{
-                DataField("Species:", character.species)
-                DataField("Gender:", character.gender)
-                DataField("Status:", character.status)
+        when {
+            characterDetailState.isLoading -> {
+                LoadingViewComponent()
+            }
+            characterDetailState.isError -> {
+                ErrorViewComponent(
+                    onRetry = {
+                        viewModel.loadCharacter(characterId)
+                    }
+                )
+            }
+            characterDetailState.data != null -> {
+                val character = characterDetailState.data!!
+                Column (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 50.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    // consumir imagen desde el api
+                    ApiImage(
+                        uri = character.image
+                    )
+                    Text(
+                        character.name,
+                        modifier = Modifier.padding(16.dp),
+                        textAlign = TextAlign.Start,
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Column{
+                        DataField("Species:", character.species)
+                        DataField("Gender:", character.gender)
+                        DataField("Status:", character.status)
+                    }
+                }
             }
         }
     }

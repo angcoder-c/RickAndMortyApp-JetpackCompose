@@ -18,12 +18,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.app.AppNavHost
@@ -31,8 +34,11 @@ import com.example.app.ui.theme.AppTheme
 import com.example.app.Location
 import com.example.app.LocationDb
 import com.example.app.RoutingNames
+import com.example.app.ViewModels.LocationsViewModel
 import com.example.app.components.BottomNavigationBar
+import com.example.app.components.ErrorViewComponent
 import com.example.app.components.HeaderComponent
+import com.example.app.components.LoadingViewComponent
 
 class LocationsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,9 +64,10 @@ class LocationsActivity : ComponentActivity() {
 @Composable
 fun LocationsScreen (
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: LocationsViewModel = viewModel()
 )  {
-    var locations = LocationDb().getAllLocations()
+    val locationsScreenState by viewModel.locationsScreenState.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,20 +76,34 @@ fun LocationsScreen (
         // header
         HeaderComponent("Locations")
 
-        // locations list
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(locations) { location ->
-                LocationRow(
-                    location = location,
-                    onClick = {
-                        navController.navigate(RoutingNames.LocationsDetailScreen(location.id))
+        when {
+            locationsScreenState.isLoading -> {
+                LoadingViewComponent()
+            }
+            locationsScreenState.isError -> {
+                ErrorViewComponent(
+                    onRetry = {
+                        viewModel.loadLocations()
                     }
                 )
+            }
+            else -> {
+                // locations list
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(locationsScreenState.data) { location ->
+                        LocationRow(
+                            location = location,
+                            onClick = {
+                                navController.navigate(RoutingNames.LocationsDetailScreen(location.id))
+                            }
+                        )
+                    }
+                }
             }
         }
     }

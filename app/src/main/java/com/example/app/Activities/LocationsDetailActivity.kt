@@ -13,20 +13,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.app.AppNavHost
 import com.example.app.ui.theme.AppTheme
 import com.example.app.Location
 import com.example.app.LocationDb
+import com.example.app.ViewModels.LocationDetailViewModel
 import com.example.app.components.ApiImage
 import com.example.app.components.HeaderBackComponent
 import com.example.app.components.DataField
+import com.example.app.components.ErrorViewComponent
+import com.example.app.components.LoadingViewComponent
 
 class LocationsDetailScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,9 +56,13 @@ class LocationsDetailScreenActivity : ComponentActivity() {
 fun LocationsDetailScreen (
     locationsId: Int,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: LocationDetailViewModel = viewModel()
 ) {
-    var locations = LocationDb().getLocationById(locationsId)
+    val locationDetailScreenState by viewModel.locationDetailScreenState.collectAsState()
+    LaunchedEffect(locationsId) {
+        viewModel.loadLocation(locationsId)
+    }
 
     Column(
         modifier = Modifier
@@ -59,28 +70,44 @@ fun LocationsDetailScreen (
             .background(MaterialTheme.colorScheme.background)
     ) {
         HeaderBackComponent(
-            title = "Location Datail",
+            title = "Location Detail",
             onClick = {
                 navController.navigateUp()
             }
         )
-        Column (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 50.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Text(
-                locations.name,
-                modifier = Modifier.padding(16.dp),
-                textAlign = TextAlign.Start,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Column{
-                DataField("ID:", locations.id.toString())
-                DataField("Type:", locations.type)
-                DataField("Dimension:", locations.dimension)
+
+        when {
+            locationDetailScreenState.isLoading -> {
+                LoadingViewComponent()
+            }
+            locationDetailScreenState.isError -> {
+                ErrorViewComponent(
+                    onRetry = {
+                        viewModel.loadLocation(locationsId)
+                    }
+                )
+            }
+            locationDetailScreenState.data != null -> {
+                val location = locationDetailScreenState.data!!
+                Column (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 50.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(
+                        location.name,
+                        modifier = Modifier.padding(16.dp),
+                        textAlign = TextAlign.Start,
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Column{
+                        DataField("ID:", location.id.toString())
+                        DataField("Type:", location.type)
+                        DataField("Dimension:", location.dimension)
+                    }
+                }
             }
         }
     }

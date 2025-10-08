@@ -7,3 +7,7 @@
 ## Laboratorio 9
 
 <img width="1342" height="493" alt="image" src="https://github.com/user-attachments/assets/3e199678-9bd5-44e5-83b0-aea7234d78c9" />
+
+## Laboratorio 10
+
+<img width="2406" height="984" alt="image" src="https://github.com/user-attachments/assets/13b754c3-aa14-4e31-a537-00b12cb4edea" />

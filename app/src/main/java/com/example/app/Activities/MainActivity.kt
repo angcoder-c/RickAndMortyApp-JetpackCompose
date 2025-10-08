@@ -1,15 +1,15 @@
 package com.example.app.Activities
 
+import android.app.Activity
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -19,23 +19,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.app.AppNavHost
 import com.example.app.ui.theme.AppTheme
-import com.example.app.R
 import com.example.app.Character
-import com.example.app.CharacterDb
 import com.example.app.RoutingNames
 import com.example.app.components.ApiImage
 import com.example.app.components.BottomNavigationBar
@@ -72,7 +64,13 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: CharactersViewModel = viewModel()
 ) {
+    val activity = LocalContext.current as? Activity
     val charactersState by viewModel.charactersScreenState.collectAsState()
+
+    // manejar el boton de back
+    BackHandler {
+        activity?.finish()
+    }
 
     Column(
         modifier = Modifier
@@ -93,7 +91,7 @@ fun MainScreen(
             }
 
             else -> {
-                // characters list
+                // Characters list
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -101,14 +99,13 @@ fun MainScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(charactersState.data) { character ->
-                        Card (
+                        Card(
                             onClick = {
                                 navController.navigate(RoutingNames.CharacterDetailScreen(character.id))
                             }
-                        ){
+                        ) {
                             CharacterRow(character = character)
                         }
-
                     }
                 }
             }
@@ -118,14 +115,12 @@ fun MainScreen(
 
 @Composable
 fun CharacterRow(character: Character) {
-    Row (
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        // consumir imaen desde el api
         ApiImage(
             uri = character.image,
             size = 32
@@ -152,9 +147,7 @@ fun CharacterRow(character: Character) {
 @Composable
 fun MainScreenPreview() {
     AppTheme {
-        MainScreen(
-            navController = rememberNavController()
-        )
+        MainScreen(navController = rememberNavController())
     }
 }
 
@@ -163,8 +156,6 @@ fun MainScreenPreview() {
 @Composable
 fun MainScreenDarkPreview() {
     AppTheme {
-        MainScreen(
-            navController = rememberNavController()
-        )
+        MainScreen(navController = rememberNavController())
     }
 }

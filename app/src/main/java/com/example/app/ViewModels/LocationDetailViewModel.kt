@@ -1,10 +1,12 @@
 package com.example.app.ViewModels
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app.Location
-import com.example.app.LocationDb
+import com.example.app.database.AppDatabase
+import com.example.app.repositories.LocationRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,32 +20,46 @@ data class LocationDetailScreenState(
 )
 
 class LocationDetailViewModel(
+    application: Application,
     private val savedStateHandle: SavedStateHandle
-) : ViewModel() {
+) : AndroidViewModel(application) {
+
+    private val database = AppDatabase.getDatabase(application)
+    private val locationRepository = LocationRepository(database.locationDao())
+
     private val _locationDetailScreenState = MutableStateFlow(LocationDetailScreenState())
     val locationDetailScreenState: StateFlow<LocationDetailScreenState> = _locationDetailScreenState.asStateFlow()
 
-    private val locationDb = LocationDb()
     private val locationId: Int = savedStateHandle.get<Int>("locationsId") ?: 0
 
     init {
         loadLocation()
     }
+
     fun loadLocation() {
         viewModelScope.launch {
-            _locationDetailScreenState.value = LocationDetailScreenState(isLoading = true)
+            try {
+                _locationDetailScreenState.value = LocationDetailScreenState(isLoading = true)
 
-            // carga - 4s
-            delay(4000)
-            val randomNumber = (1..10).random()
+                delay(4000)
 
-            if (randomNumber % 2 == 0) {
-                _locationDetailScreenState.value = LocationDetailScreenState(
-                    isLoading = false,
-                    data = locationDb.getLocationById(locationId),
-                    isError = false
-                )
-            } else {
+                val randomNumber = (1..10).random()
+
+                if (randomNumber % 2 == 0) {
+                    val location = locationRepository.getLocationById(locationId)
+                    _locationDetailScreenState.value = LocationDetailScreenState(
+                        isLoading = false,
+                        data = location,
+                        isError = false
+                    )
+                } else {
+                    _locationDetailScreenState.value = LocationDetailScreenState(
+                        isLoading = false,
+                        data = null,
+                        isError = true
+                    )
+                }
+            } catch (e: Exception) {
                 _locationDetailScreenState.value = LocationDetailScreenState(
                     isLoading = false,
                     data = null,

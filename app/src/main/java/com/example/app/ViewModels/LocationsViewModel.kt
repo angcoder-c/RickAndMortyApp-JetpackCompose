@@ -1,10 +1,11 @@
 package com.example.app.ViewModels
 
-import com.example.app.Location
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.app.LocationDb
-import kotlinx.coroutines.delay
+import com.example.app.Location
+import com.example.app.database.AppDatabase
+import com.example.app.repositories.LocationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,11 +17,13 @@ data class LocationsScreenState(
     val isError: Boolean = false
 )
 
-class LocationsViewModel : ViewModel() {
+class LocationsViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val database = AppDatabase.getDatabase(application)
+    private val locationRepository = LocationRepository(database.locationDao())
+
     private val _locationsScreenState = MutableStateFlow(LocationsScreenState())
     val locationsScreenState: StateFlow<LocationsScreenState> = _locationsScreenState.asStateFlow()
-
-    private val locationDb = LocationDb()
 
     init {
         loadLocations()
@@ -28,19 +31,17 @@ class LocationsViewModel : ViewModel() {
 
     fun loadLocations() {
         viewModelScope.launch {
-            _locationsScreenState.value = LocationsScreenState(isLoading = true)
+            try {
+                _locationsScreenState.value = LocationsScreenState(isLoading = true)
 
-            // carga - 4s
-            delay(4000)
-            val randomNumber = (1..10).random()
-
-            if (randomNumber % 2 == 0) {
-                _locationsScreenState.value = LocationsScreenState(
-                    isLoading = false,
-                    data = locationDb.getAllLocations(),
-                    isError = false
-                )
-            } else {
+                locationRepository.getAllLocations().collect { locations ->
+                    _locationsScreenState.value = LocationsScreenState(
+                        isLoading = false,
+                        data = locations,
+                        isError = false
+                    )
+                }
+            } catch (e: Exception) {
                 _locationsScreenState.value = LocationsScreenState(
                     isLoading = false,
                     data = emptyList(),

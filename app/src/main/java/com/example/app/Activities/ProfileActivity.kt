@@ -5,10 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,25 +19,24 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.app.AppNavHost
-import com.example.app.R
 import com.example.app.RoutingNames
+import com.example.app.ViewModels.ProfileViewModel
 import com.example.app.components.BottomNavigationBar
 import com.example.app.components.DataField
 import com.example.app.components.HeaderComponent
@@ -56,7 +53,8 @@ class ProfileActivity : ComponentActivity() {
                     bottomBar = {
                         BottomNavigationBar(navController = navController)
                     },
-                    modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
                     AppNavHost(
                         navController = navController,
                         modifier = Modifier.padding(innerPadding)
@@ -70,16 +68,17 @@ class ProfileActivity : ComponentActivity() {
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = viewModel()
 ) {
+    val profileState by viewModel.profileState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        HeaderComponent(
-            title = "Profile"
-        )
+        HeaderComponent(title = "Profile")
 
         Column(
             modifier = Modifier
@@ -103,7 +102,7 @@ fun ProfileScreen(
             Column {
                 DataField(
                     "Nombre: ",
-                    "Angel Gabriel Chavez Otzoy"
+                    if (profileState.userName.isNotEmpty()) profileState.userName else "Usuario"
                 )
                 DataField(
                     "Carnet: ",
@@ -111,11 +110,13 @@ fun ProfileScreen(
                 )
             }
 
-            // unlogin
+            // logout button
             Button(
                 onClick = {
-                    navController.navigate(RoutingNames.LoginScreen) {
-                        popUpTo(RoutingNames.ProfileScreen) { inclusive = true }
+                    viewModel.logout {
+                        navController.navigate(RoutingNames.LoginScreen) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 },
                 modifier = Modifier
@@ -123,38 +124,42 @@ fun ProfileScreen(
                     .padding(horizontal = 16.dp, vertical = 24.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error
-                )
+                ),
+                enabled = !profileState.isLoggingOut
             ) {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = "logout",
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Cerrar sesión")
+                if (profileState.isLoggingOut) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        color = MaterialTheme.colorScheme.onError
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "logout",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Cerrar sesión")
+                }
             }
         }
     }
 }
 
-// ligth theme preview
+// light theme preview
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
     AppTheme {
-        ProfileScreen(
-            navController = rememberNavController()
-        )
+        ProfileScreen(navController = rememberNavController())
     }
 }
 
-// darck theme preview
+// dark theme preview
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun ProfileScreenDarkPreview() {
     AppTheme {
-        ProfileScreen(
-            navController = rememberNavController()
-        )
+        ProfileScreen(navController = rememberNavController())
     }
 }

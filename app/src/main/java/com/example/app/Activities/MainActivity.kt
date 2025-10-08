@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.app.AppNavHost
 import com.example.app.ui.theme.AppTheme
@@ -42,10 +43,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 val navController = rememberNavController()
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                val screensWithNavBar = listOf(
+                    "MainScreen",
+                    "LocationsScreen",
+                    "ProfileScreen"
+                )
+
+                // verificar si debemos mostrar el navbar
+                val showBottomBar = screensWithNavBar.any { screen ->
+                    currentRoute?.contains(screen) == true
+                }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        BottomNavigationBar(navController = navController)
+                        if (showBottomBar) {
+                            BottomNavigationBar(navController = navController)
+                        }
                     }
                 ) { innerPadding ->
                     AppNavHost(
@@ -91,7 +108,7 @@ fun MainScreen(
             }
 
             else -> {
-                // Characters list
+                // characters list
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()

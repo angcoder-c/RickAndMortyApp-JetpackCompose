@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.app.Character
 import com.example.app.database.AppDatabase
+import com.example.app.database.entities.CharacterEntity
 import com.example.app.repositories.CharacterRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 
 data class CharacterDetailScreenState(
     val isLoading: Boolean = true,
-    val data: Character? = null,
+    val data: CharacterEntity? = null,
     val isError: Boolean = false
 )
 

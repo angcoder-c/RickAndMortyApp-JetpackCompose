@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app.Character
 import com.example.app.database.AppDatabase
+import com.example.app.database.entities.CharacterEntity
 import com.example.app.repositories.CharacterRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 
 data class CharactersScreenState(
     val isLoading: Boolean = true,
-    val data: List<Character> = emptyList(),
+    val data: List<CharacterEntity> = emptyList(),
     val isError: Boolean = false
 )
 

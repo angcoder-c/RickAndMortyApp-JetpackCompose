@@ -39,6 +39,7 @@ import com.example.app.components.BottomNavigationBar
 import com.example.app.components.ErrorViewComponent
 import com.example.app.components.HeaderComponent
 import com.example.app.components.LoadingViewComponent
+import com.example.app.database.entities.LocationEntity
 
 class LocationsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,7 +111,7 @@ fun LocationsScreen (
 }
 
 @Composable
-fun LocationRow(location: Location, onClick: () -> Unit) {
+fun LocationRow(location: LocationEntity, onClick: () -> Unit) {
     Card (
         modifier = Modifier
             .fillMaxWidth(),

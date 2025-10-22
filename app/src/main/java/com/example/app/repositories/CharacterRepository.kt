@@ -1,35 +1,40 @@
 package com.example.app.repositories
 
 import com.example.app.Character
-import com.example.app.CharacterDb
 import com.example.app.database.dao.CharacterDao
-import com.example.app.mappers.toEntity
-import com.example.app.mappers.toModel
+import com.example.app.database.entities.CharacterEntity
+import com.example.app.http.ApiClient
+import com.example.app.network.ApiService
+import com.example.app.network.mappers.toCharacterEntities
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 
-class CharacterRepository(
-    private val characterDao: CharacterDao,
-    private val characterDb: CharacterDb = CharacterDb()
-) {
-    // CharacterDb to Room
+class CharacterRepository(private val characterDao: CharacterDao) {
+    private val apiService = ApiService(ApiClient)
+
+    fun getAllCharacters(): Flow<List<CharacterEntity>> {
+        return characterDao.getAllCharacters()
+    }
+
+    suspend fun getCharacterById(id: Int): CharacterEntity? {
+        return characterDao.getCharacterById(id)
+    }
+
     suspend fun syncCharacters() {
-        val characters = characterDb.getAllCharacters()
-        val entities = characters.map {
-            it.toEntity()
-        }
-        characterDao.insertAll(entities)
-    }
+        try {
+            val existingCharacters = characterDao.getAllCharacters().first()
 
-    // characters from Room
-    fun getAllCharacters(): Flow<List<Character>> {
-        return characterDao.getAll().map { entities ->
-            entities.map { it.toModel() }
-        }
-    }
+            // offline first
+            if (existingCharacters.isNotEmpty()) {
+                return
+            }
 
-    // characters by id from room
-    suspend fun getCharacterById(id: Int): Character? {
-        return characterDao.getById(id)?.toModel()
+            // si no hay datos locales, obtenerlos del api
+            val response = apiService.getCharacters(page = 1)
+            val characters = response.results.toCharacterEntities()
+            characterDao.insertAll(characters)
+        } catch (e: Exception) {
+            throw Exception("Error: ${e.message}")
+        }
     }
 }

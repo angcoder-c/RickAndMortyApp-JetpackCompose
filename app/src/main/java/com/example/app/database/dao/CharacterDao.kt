@@ -9,12 +9,19 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CharacterDao {
+
+    @Query("SELECT * FROM characters ORDER BY name ASC")
+    fun getAllCharacters(): Flow<List<CharacterEntity>>
+
+    @Query("SELECT * FROM characters WHERE id = :id")
+    suspend fun getCharacterById(id: Int): CharacterEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(characters: List<CharacterEntity>)
 
-    @Query("SELECT * FROM characters")
-    fun getAll(): Flow<List<CharacterEntity>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(character: CharacterEntity)
 
-    @Query("SELECT * FROM characters WHERE id = :id")
-    suspend fun getById(id: Int): CharacterEntity?
+    @Query("DELETE FROM characters")
+    suspend fun deleteAll()
 }

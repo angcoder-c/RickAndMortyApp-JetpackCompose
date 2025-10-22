@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.app.Location
 import com.example.app.database.AppDatabase
+import com.example.app.database.entities.LocationEntity
 import com.example.app.repositories.LocationRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 
 data class LocationDetailScreenState(
     val isLoading: Boolean = true,
-    val data: Location? = null,
+    val data: LocationEntity? = null,
     val isError: Boolean = false
 )
 

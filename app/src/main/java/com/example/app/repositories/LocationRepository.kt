@@ -1,34 +1,51 @@
 package com.example.app.repositories
 
 import com.example.app.Location
-import com.example.app.LocationDb
 import com.example.app.database.dao.LocationDao
-import com.example.app.mappers.toEntity
-import com.example.app.mappers.toModel
+import com.example.app.database.entities.LocationEntity
+import com.example.app.http.ApiClient
+import com.example.app.network.ApiService
+import com.example.app.network.mappers.toLocationEntities
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 
 class LocationRepository(
-    private val locationDao: LocationDao,
-    private val locationDb: LocationDb = LocationDb()
+    private val locationDao: LocationDao
 ) {
+    private val apiService = ApiService(ApiClient)
+    /**
+     * ubicaciones desde la base de datos local
+     */
+    fun getAllLocations(): Flow<List<LocationEntity>> {
+        return locationDao.getAllLocations()
+    }
 
-    // LocationDb from room
+    /**
+     * ubicacion por id desde la base de datos local
+     */
+    suspend fun getLocationById(id: Int): LocationEntity? {
+        return locationDao.getLocationById(id)
+    }
+
+    /**
+     * sincroniza ubicaciones desde el api y las guarda en Room
+     */
     suspend fun syncLocations() {
-        val locations = locationDb.getAllLocations()
-        val entities = locations.map { it.toEntity() }
-        locationDao.insertAll(entities)
-    }
+        try {
+            // verificar si ya tenemos datos locales
+            val existingLocations = locationDao.getAllLocations().first()
 
-    // locations from room
-    fun getAllLocations(): Flow<List<Location>> {
-        return locationDao.getAll().map { entities ->
-            entities.map { it.toModel() }
+            // offline first
+            if (existingLocations.isNotEmpty()) {
+                return
+            }
+
+            // si no hay datos locales, obtenerlos del api
+            val response = apiService.getLocations(page=1)
+            val locations = response.results.toLocationEntities()
+            locationDao.insertAll(locations)
+        } catch (e: Exception) {
+            throw Exception("Error: ${e.message}")
         }
-    }
-
-    // locations by id from room
-    suspend fun getLocationById(id: Int): Location? {
-        return locationDao.getById(id)?.toModel()
     }
 }

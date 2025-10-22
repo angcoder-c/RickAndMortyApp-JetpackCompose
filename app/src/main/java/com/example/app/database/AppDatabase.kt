@@ -18,8 +18,10 @@ import com.example.app.database.entities.LocationEntity
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun characterDao(): CharacterDao
     abstract fun locationDao(): LocationDao
+
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
@@ -29,8 +31,10 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "rick_morty_database"
-                ).build()
+                    "rick_and_morty_database"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

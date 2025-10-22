@@ -36,6 +36,7 @@ import com.example.app.components.HeaderComponent
 import com.example.app.ViewModels.CharactersViewModel
 import com.example.app.components.ErrorViewComponent
 import com.example.app.components.LoadingViewComponent
+import com.example.app.database.entities.CharacterEntity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,7 +132,7 @@ fun MainScreen(
 }
 
 @Composable
-fun CharacterRow(character: Character) {
+fun CharacterRow(character: CharacterEntity) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

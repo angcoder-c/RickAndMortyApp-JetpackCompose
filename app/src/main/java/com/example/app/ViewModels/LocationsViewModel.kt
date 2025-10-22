@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app.Location
 import com.example.app.database.AppDatabase
+import com.example.app.database.entities.LocationEntity
 import com.example.app.repositories.LocationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 
 data class LocationsScreenState(
     val isLoading: Boolean = true,
-    val data: List<Location> = emptyList(),
+    val data: List<LocationEntity> = emptyList(),
     val isError: Boolean = false
 )
 

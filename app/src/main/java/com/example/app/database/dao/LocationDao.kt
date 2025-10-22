@@ -9,12 +9,18 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LocationDao {
+    @Query("SELECT * FROM locations ORDER BY name ASC")
+    fun getAllLocations(): Flow<List<LocationEntity>>
+
+    @Query("SELECT * FROM locations WHERE id = :id")
+    suspend fun getLocationById(id: Int): LocationEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(locations: List<LocationEntity>)
 
-    @Query("SELECT * FROM locations")
-    fun getAll(): Flow<List<LocationEntity>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(location: LocationEntity)
 
-    @Query("SELECT * FROM locations WHERE id = :id")
-    suspend fun getById(id: Int): LocationEntity?
+    @Query("DELETE FROM locations")
+    suspend fun deleteAll()
 }

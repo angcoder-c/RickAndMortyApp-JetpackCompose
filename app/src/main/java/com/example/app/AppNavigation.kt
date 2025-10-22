@@ -5,7 +5,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.app.Activities.CharacterDetailScreen
 import com.example.app.Activities.LocationsDetailScreen
@@ -13,7 +12,6 @@ import com.example.app.Activities.LocationsScreen
 import com.example.app.Activities.LoginScreen
 import com.example.app.Activities.MainScreen
 import com.example.app.Activities.ProfileScreen
-import com.example.app.RoutingNames
 
 @Composable
 fun AppNavHost(
@@ -25,13 +23,17 @@ fun AppNavHost(
         startDestination = RoutingNames.LoginScreen,
         modifier = modifier
     ) {
-        composable<RoutingNames.MainScreen> {
-            MainScreen(navController)
-        }
+        // login Screen
         composable<RoutingNames.LoginScreen> {
-            LoginScreen(navController)
+            LoginScreen(navController = navController)
         }
 
+        // main Screen
+        composable<RoutingNames.MainScreen> {
+            MainScreen(navController = navController)
+        }
+
+        // character detail screen
         composable<RoutingNames.CharacterDetailScreen> { backStackEntry ->
             val characterDetail = backStackEntry.toRoute<RoutingNames.CharacterDetailScreen>()
             CharacterDetailScreen(
@@ -40,10 +42,12 @@ fun AppNavHost(
             )
         }
 
+        // locations screen
         composable<RoutingNames.LocationsScreen> {
-            LocationsScreen(navController)
+            LocationsScreen(navController = navController)
         }
 
+        // location detail screen
         composable<RoutingNames.LocationsDetailScreen> { backStackEntry ->
             val locationDetail = backStackEntry.toRoute<RoutingNames.LocationsDetailScreen>()
             LocationsDetailScreen(
@@ -52,8 +56,9 @@ fun AppNavHost(
             )
         }
 
+        // profile screen
         composable<RoutingNames.ProfileScreen> {
-            ProfileScreen(navController)
+            ProfileScreen(navController = navController)
         }
     }
 }

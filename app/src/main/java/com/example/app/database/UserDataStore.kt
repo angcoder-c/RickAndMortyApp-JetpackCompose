@@ -17,25 +17,23 @@ class UserDataStore(private val context: Context) {
         private val USER_NAME_KEY = stringPreferencesKey("user_name")
     }
 
-    // save username
-    suspend fun saveUsername(name: String) {
+    suspend fun saveUserName(userName: String) {
         context.dataStore.edit { preferences ->
-            preferences[USER_NAME_KEY] = name
+            preferences[USER_NAME_KEY] = userName
         }
     }
 
-    fun getUsernameFlow(): Flow<String?> {
+    suspend fun getUserName(): String? {
+        return context.dataStore.data.first()[USER_NAME_KEY]
+    }
+
+    fun getUserNameFlow(): Flow<String?> {
         return context.dataStore.data.map { preferences ->
             preferences[USER_NAME_KEY]
         }
     }
 
-    suspend fun getUsername(): String? {
-        return context.dataStore.data.first()[USER_NAME_KEY]
-    }
-
-    // logout
-    suspend fun clearUsername() {
+    suspend fun clearUserName() {
         context.dataStore.edit { preferences ->
             preferences.remove(USER_NAME_KEY)
         }

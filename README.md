@@ -11,3 +11,8 @@
 ## Laboratorio 10
 
 <img width="2406" height="984" alt="image" src="https://github.com/user-attachments/assets/13b754c3-aa14-4e31-a537-00b12cb4edea" />
+
+## Laboratorio 12
+
+<img width="1598" height="717" alt="Screenshot From 2025-10-22 17-11-07" src="https://github.com/user-attachments/assets/d3ea6fc3-eb18-460b-8316-41265781f8af" />
+
